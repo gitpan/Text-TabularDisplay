@@ -1,6 +1,8 @@
 package Text::TabularDisplay;
 
 # -------------------------------------------------------------------
+# $Id$
+# -------------------------------------------------------------------
 # Text::TabularDisplay - Display text in formatted table output
 # Copyright (C) 2004 darren chamberlain <darren@cpan.org>
 #
@@ -21,9 +23,10 @@ package Text::TabularDisplay;
 
 use strict;
 use integer;
-use vars qw($VERSION);
+use vars qw($VERSION $REVISION);
 
-$VERSION = "1.19";
+$VERSION = "1.20";  # $Date: 2004/04/29 12:24:52 $
+$REVISION = sprintf "%d.%02d", q$Revision: 1.20 $ =~ /(\d+)\.(\d+)/;
 
 # ---======================= Public Methods ======================---
 
@@ -229,7 +232,7 @@ sub _add {
         if (scalar @$add > $$size);
 
     for (my $i = 0; $i <= $#$add; $i++) {
-        my $l = length $add->[$i];
+        my $l = _column_length($add->[$i]);
 
         push @data, $add->[$i];
         $length->[$i] = $l
@@ -246,14 +249,43 @@ sub _add {
 # -------------------------------------------------------------------
 sub _format_line {
     my ($columns, $lengths) = @_;
-    my @line;
 
-    for (my $i = 0; $i <= $#$columns; $i++) {
-        push @line, 
-            sprintf " %-" . $lengths->[$i] . "s ", $columns->[$i];
+    my $height = 0;
+    my @col_lines;
+    for (@$columns) {
+        my @lines = split "\n";
+        $height = scalar @lines
+            if $height < @lines;
+        push @col_lines, \@lines;
     }
 
-    return join '|', "", @line, "";
+    my @lines;
+    for my $h (0 .. $height - 1 ) {
+        my @line;
+        for (my $i = 0; $i <= $#$columns; $i++) {
+            push @line,
+                sprintf " %-" . $lengths->[$i] . "s ", $col_lines[$i][$h] || '';
+        }
+        push @lines, join '|', "", @line, "";
+    }
+
+    return join "\n", @lines;
+}
+
+# -------------------------------------------------------------------
+# _column_length($str)
+# -------------------------------------------------------------------
+sub _column_length
+{
+    my ($str) = @_;
+
+    my $len = 0;
+    for (split "\n", $str) {
+        $len = length
+            if $len < length;
+    }
+
+    return $len;
 }
 
 1;
@@ -273,13 +305,15 @@ Text::TabularDisplay - Display text in formatted table output
         while (@row = $sth->fetchrow);
     print $table->render;
 
-    +----+-----------+
-    | id | name      |
-    +----+-----------+
-    | 1  | Tom       |
-    | 2  | Dick      |
-    | 3  | Harry     |
-    +----+-----------+
+    +----+--------------+
+    | id | name         |
+    +----+--------------+
+    | 1  | Tom          |
+    | 2  | Dick         |
+    | 3  | Barry        |
+    |    |  (aka Bazza) |
+    | 4  | Harry        |
+    +----+--------------+
 
 
 =head1 DESCRIPTION
@@ -497,46 +531,29 @@ things with the data, like legnth() and sprintf().  Non-character data
 can be passed in, of course, but will be treated as strings; this may
 have ramifications for objects that implement overloading.
 
-Newlines contained within the data ruin formatting.  This is
-consistent with the software that this module is emulating (the mysql
-command line client), but only because this was easier to implement.
-
-Currently, this:
-
-    my $t = Text::TabularDisplay->new("id", "text");
-    $t->add(1, "This is my text.\nThere are many like it, but this one is mine.");
-    print $t->render;
-
-renders as this:
-
-    +----+----------------------------------------------------------------+
-    | id | text
-    |
-    +----+----------------------------------------------------------------+
-    | 1  | This is my text.
-    There are many like it, but this one is mine. |
-    +----+----------------------------------------------------------------+
-
-I would like it to render like so:
-
-    +----+----------------------------------------------------------------+
-    | id | text                                                           |
-    +----+----------------------------------------------------------------+
-    | 1  | This is my text.                                               |
-    |    | There are many like it, but this one is mine.                  |
-    +----+----------------------------------------------------------------+
-
-Patches welcome, of course. ;)
-
 The biggest issue, though, is that this module duplicates a some of the
 functionality of Data::ShowTable.  Of course, Data::ShowTable is a
 large, complex monolithic tool that does a lot of things, while
 Text::TabularDisplay is small and fast.
 
-=head1 VERSION
-
-This documentation describes C<Text::TabularDisplay> version 1.19.
-
 =head1 AUTHOR
 
 darren chamberlain E<lt>darren@cpan.orgE<gt>
+
+=head1 CREDITS
+
+The following people have contributed patches, suggestions, tests,
+feedback, or good karma:
+
+    David N. Blank-Edelman
+    Eric Cholet
+    Ken Youens-Clark
+    Michael Fowler
+    Paul Cameron
+    Prakash Kailasa
+    Slaven Rezic
+
+=head1 VERSION
+
+This documentation describes C<Text::TabularDisplay> version 1.20.
+

@@ -2,6 +2,13 @@
                      --- Text-TabularDisplay ---
 ======================================================================
 
+2004-10-20 16:28  dlc
+
+	* TabularDisplay (1.20): Applied a mutate agglomeration of a pair of
+	patches from Prakash Kailasa and Paul Cameron to address newline folding
+	within values, slightly modified according to suggestions from Slaven
+	Rezic.
+
 2004-09-21 09:14  dlc
 
 	* TabularDisplay.pm (1.19): Applied a patch from Eric Cholet to

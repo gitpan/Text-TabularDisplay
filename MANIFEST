@@ -20,6 +20,7 @@ t/11.t
 t/12.t
 t/13.t
 t/14.t
+t/15.t
 TabularDisplay.pm
 SIGNATURE
 META.yml                                 Module meta-data (added by MakeMaker)
