@@ -1,52 +1,65 @@
 #!/usr/bin/perl
 
 # ----------------------------------------------------------------------
-# $Id: mysql.pl,v 1.1 2002/09/24 02:44:01 dlc Exp $
+# $Id: mysql.pl,v 1.3 2002/10/25 04:08:05 dlc Exp $
 # ----------------------------------------------------------------------
 # Example usage of Text::TabularDisplay to implement a low-functionality
 # version of the mysql text monitor.
 # ----------------------------------------------------------------------
 
 use strict;
-use vars qw(%opts);
+use vars qw(%opts $prog $histfile);
 
 use Carp qw(carp);
 use DBI;
 use File::Basename qw(basename);
+use File::Spec;
 use Getopt::Long;
 use Term::ReadLine;
 use Text::TabularDisplay;
 
-$0 = basename $0;
+$prog = basename $0;
+$histfile = File::Spec->catfile($ENV{'HOME'}, ".mysql_history");
+
+eval {
+    require MySQL::Config;
+    my %defaults = MySQL::Config::parse_defaults("my", [ qw(client) ]);
+
+    for (qw(user password host)) {
+        $opts{$_} = $defaults{$_};
+    }
+};
 
 GetOptions(\%opts,
-    "username|u=s",
+    "user|u=s",
     "password|p=s",
-    "host|h=s",
-    "help!");
+    "help|?!",
+    "host=s");
 
 $opts{'host'} ||= "localhost";
 if (defined $opts{'help'}) {
-    print STDERR "$0 - mysql command line client emulation\n",
-                 "Usage: $0 [OPTIONS] DB_NAME\n\n",
+    print STDERR "$prog - mysql command line client emulation\n",
+                 "Usage: $prog [OPTIONS] DB_NAME\n\n",
                  "OPTIONS include:\n",
-                 "\t--username=\$username\tUsername to connect as\n",
-                 "\t--password=\$password\tPassword for \$username\n",
-                 "\t--host=\$host\t\tHost on which DB_NAME can be found\n",
-                 "\thelp\t\t\tYou're reading it.\n\n";
+                 "  --user=\$username      Username to connect as\n",
+                 "  --password=\$password  Password for \$user\n",
+                 "  --host=\$host          Host on which DB_NAME can be found\n",
+                 "  --help                You're reading it.\n\n";
     exit(1);
 }
 
-my $db = shift(@ARGV) or die "$0: Must supply a database name!";
+
+my $db = shift(@ARGV) or die "$prog: Must supply a database name!\n";
 
 # Create the Text::TabularDisplay and Term::ReadLine instances, and
 # make the database connection.
 my $table = Text::TabularDisplay->new;
 my $term = Term::ReadLine->new("mysql");
 my $dbh = DBI->connect("dbi:mysql:database=$db;host=$opts{'host'}",
-                        $opts{'username'}, $opts{'password'})
+                        $opts{'user'}, $opts{'password'})
     or die "Can't connect to $db on $opts{'host'}: $DBI::errstr";
 
+$term->ReadHistory($histfile);
 
 while (defined (my $line = $term->readline("mysql> "))) {
     #$term->AddHistory($line);
@@ -84,6 +97,8 @@ while (defined (my $line = $term->readline("mysql> "))) {
     # which is pretty ugly...
     printf "%s\n", $table->render;
 }
+
+$term->WriteHistory($histfile);
 
 print "Bye!\n";
 exit(0);

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -l
 
 use Text::TabularDisplay;
 use Mail::Address;

@@ -1,7 +1,7 @@
 package Text::TabularDisplay;
 
 # -------------------------------------------------------------------
-# $Id: TabularDisplay.pm,v 1.8 2002/09/24 10:39:34 dlc Exp $
+# $Id: TabularDisplay.pm,v 1.18 2002/10/24 22:26:20 dlc Exp $
 # -------------------------------------------------------------------
 # Text::TabularDisplay - Display text in formatted table output
 # Copyright (C) 2002 darren chamberlain <darren@cpan.org>
@@ -22,11 +22,14 @@ package Text::TabularDisplay;
 # -------------------------------------------------------------------
 
 use strict;
+use integer;
 use vars qw($VERSION);
-use overload '""' => "render";
 
-sub Version {
-    $VERSION = 0.37;
+BEGIN {
+    sub Version {
+        $VERSION = sprintf "%d.%02d", q$Revision: 1.18 $ =~ /(\d+)\.(\d+)/;
+    }
+    Version();
 }
 
 # ---======================= Public Methods ======================---
@@ -46,6 +49,7 @@ sub new {
         _COLUMNS => [ ],
         _DATA    => [ ],
         _LENGTHS => [ ],
+        _SIZE    => 0,
     } => $class;
 
     $self->columns(@_) if (@_);
@@ -73,16 +77,22 @@ sub clone {
 # -------------------------------------------------------------------
 # columns([@columns])
 #
-# Passing in columns clears out the instance.  Returns a list of
-# column names in list context, but returns the number of columns in
-# scalar context.
+# Returns a list of column names in list context, but returns the
+# number of columns in scalar context.
 # -------------------------------------------------------------------
 sub columns {
     my $self = shift;
     my @columns;
 
     if (@_) {
-        _add($self->{ _COLUMNS }, $self->{ _LENGTHS }, [ @_ ]);
+        my $cnum = $self->{ _SIZE };
+        if ($cnum > scalar @_) {
+            push @_, ""
+                while ($self->columns > scalar @_);
+        }
+
+        @{ $self->{ _COLUMNS } } = ();
+        _add($self->{ _COLUMNS }, $self->{ _LENGTHS }, \$self->{ _SIZE }, [ @_ ]);
     }
     @columns = @{ $self->{ _COLUMNS }->[0] || [ ]};
 
@@ -100,7 +110,7 @@ sub add {
     my $add = UNIVERSAL::isa($_[0], 'ARRAY') ? shift : [ @_ ];
 
     if (@$add) {
-        _add($self->{ _DATA }, $self->{ _LENGTHS }, $add);
+        _add($self->{ _DATA }, $self->{ _LENGTHS }, \$self->{ _SIZE }, $add);
     }
 
     return $self;
@@ -117,25 +127,36 @@ sub render {
     my $self = shift;
     my $start = shift || 0;
     my $end = shift || $#{ $self->{ _DATA } };
-    my ($bar, $datum, @text);
+    my $size = $self->{ _SIZE };
+    my ($bar, @columns, $datum, @text);
+
     $bar = join "+", "",
                      map( { "-" x ($_ + 2) } @{ $self->{ _LENGTHS } }),
                      "";
 
     push @text, $bar;
-    if ($self->columns) {
-        push @text, _format_line([ $self->columns ], $self->{ _LENGTHS });
+    if (@columns = $self->columns) {
+        push @text, _format_line(\@columns, $self->{ _LENGTHS });
         push @text, $bar;
     }
 
     for (my $i = $start; $i <= $end; $i++) {
         $datum = $self->{ _DATA }->[$i];
         last unless defined $datum;
+
+        # Pad the array if there are more elements in @columns
+        push @$datum, ""
+            until (@$datum == $size);
         push @text, _format_line($datum, $self->{ _LENGTHS });
     }
 
     push @text, $bar;
     return join "\n", @text;
+}
+
+sub items {
+    my $self = shift;
+    return scalar @{ $self->{ _DATA } };
 }
 
 # ----------------------------------------------------------------------
@@ -167,12 +188,37 @@ sub populate {
     (@_) or return $self;
     my $data = UNIVERSAL::isa($_[0], 'ARRAY') ? shift : [ @_ ];
 
-    while (defined (my $datum = shift @$data)) {
-        $self->add($datum);
+    for (my $i = 0; $i <= $#$data; $i++) {
+        $self->add($data->[$i]);
     }
 
     return $self;
 }
+
+
+# ----------------------------------------------------------------------
+# paginate($items_per_page)
+#
+# Returns a list of rendered pages, with $items_per_page - 4 elements
+# on each (operational overhead)
+# ----------------------------------------------------------------------
+sub paginate {
+    my $self = shift;
+    my $items_per_page = shift || 62;
+    my ($items, $pages, $current, @pages);
+
+    $items = $self->items;
+    $pages = $items / $items_per_page;
+    $pages += 1 if $items % $items_per_page;
+
+    for (my $i = 0; $i < $pages; $i++) {
+        push @pages, $self->render($current, $items_per_page);
+        $current += $items_per_page;
+    }
+
+    return @pages;
+}
+
 
 # ---====================== Private Methods ======================---
 
@@ -183,18 +229,21 @@ sub populate {
 # Adds @add to @where and modifies @lengths, as necessary
 # -------------------------------------------------------------------
 sub _add {
-    my ($where, $length, $add) = @_;
+    my ($where, $length, $size, $add) = @_;
     my @data;
+
+    $$size = scalar @$add
+        if (scalar @$add > $$size);
 
     for (my $i = 0; $i <= $#$add; $i++) {
         my $l = length $add->[$i];
+
         push @data, $add->[$i];
         $length->[$i] = $l
             unless $length->[$i] > $l;
     }
     push @$where, \@data;
 }
-
 
 # -------------------------------------------------------------------
 # _format_line(\@columns, \@lengths)
@@ -206,15 +255,13 @@ sub _format_line {
     my ($columns, $lengths) = @_;
     my @line;
 
-    #return unless @$columns == @$length;
     for (my $i = 0; $i <= $#$columns; $i++) {
-        push @line, sprintf " %-" . $lengths->[$i] . "s ", $columns->[$i];
+        push @line, 
+            sprintf " %-" . $lengths->[$i] . "s ", $columns->[$i];
     }
 
     return join '|', "", @line, "";
 }
-
-BEGIN { Version }
 
 1;
 
@@ -244,9 +291,9 @@ Text::TabularDisplay - Display text in formatted table output
 
 =head1 DESCRIPTION
 
-Text::TabularDisplay simplifies displaying data in a table.  The
-output is identical to the columnar display of query results in the
-mysql text monitor.  For example, this data:
+Text::TabularDisplay simplifies displaying textual data in a table.
+The output is identical to the columnar display of query results in
+the mysql text monitor.  For example, this data:
 
     1, "Tom Jones", "(666) 555-1212"
     2, "Barnaby Jones", "(666) 555-1213"
@@ -275,12 +322,12 @@ Produces:
 
 Text::TabularDisplay has four primary methods: new(), columns(),
 add(), and render().  new() creates a new Text::TabularDisplay
-instance; columns() sets the expected columns in the output table;
+instance; columns() sets the column headers in the output table;
 add() adds data to the instance; and render() returns a formatted
 string representation of the instance.
 
-There are also a few auxilliary convenience methods: clone(), reset(),
-and populate().
+There are also a few auxilliary convenience methods: clone(), items(),
+reset(), populate(), and paginate().
 
 =over
 
@@ -302,17 +349,17 @@ the object.  See L<Text::TabularDisplay/clone>.
 
 Gets or sets the column names for an instance.  This method is called
 automatically by the constructor with any parameters that are passed
-to the constructor.
+to the constructor (if any are passed).
 
 When called in scalar context, columns() returns the I<number of
-columns in the instance>, rather than the columns themselves.  Note
-that in list context, copies of the columns names are returned; the
-names of the columns cannot be set this way.
+columns in the instance>, rather than the columns themselves.  In list
+context, copies of the columns names are returned; the names of the
+columns cannot be modified this way.
 
 =item B<add>
 
-Takes a list of items and adds them as the next column of data to be
-displayed.  Can also take a reference to an array, so that large
+Takes a list of items and appends it to the list of items to be
+displayed.  add() can also take a reference to an array, so that large
 arrays don't need to be copied.
 
 As elements are processed, add() maintains the width of each column
@@ -383,6 +430,35 @@ Produces:
 
 As an aside, note the chaining of calls to add().
 
+The elements in the table are padded such that there is the same
+number of items in each row, including the header.  Thus:
+
+    $t->columns(qw< One Two >);
+    print $t->render;
+
+    +-----+-----+----+
+    | One | Two |    |
+    +-----+-----+----+
+    | 1   | 2   | 3  |
+    | 4   | 5   | 6  |
+    | 7   | 8   | 9  |
+    | 10  | 11  | 12 |
+    +-----+-----+----+
+
+And:
+
+    $t->columns(qw< One Two Three Four>);
+    print $t->render;
+
+    +-----+-----+-------+------+
+    | One | Two | Three | Four |
+    +-----+-----+-------+------+
+    | 1   | 2   | 3     |      |
+    | 4   | 5   | 6     |      |
+    | 7   | 8   | 9     |      |
+    | 10  | 11  | 12    |      |
+    +-----+-----+-------+------+
+
 =back
 
 =head1 OTHER METHODS
@@ -393,6 +469,13 @@ As an aside, note the chaining of calls to add().
 
 The clone() method returns an identical copy of a Text::TabularDisplay
 instance, completely separate from the cloned instance.
+
+=item items()
+
+The items() method returns the number of elements currently stored in
+the data structure:
+
+    printf "There are %d elements in \$t.\n", $t->items;
 
 =item reset()
 
@@ -407,7 +490,7 @@ selectall_arrayref method:
 
     $sql = "SELECT " . join(", ", @c) . " FROM mytable";
     $t->columns(@c);
-    $t->add($dbh->selectall_arrayref($sql));
+    $t->populate($dbh->selectall_arrayref($sql));
 
 This is for convenience only; the implementation maps this to multiple
 calls to add().
@@ -459,7 +542,7 @@ Text::TabularDisplay is small and fast.
 
 =head1 VERSION
 
-$Id: TabularDisplay.pm,v 1.8 2002/09/24 10:39:34 dlc Exp $
+$Id: TabularDisplay.pm,v 1.18 2002/10/24 22:26:20 dlc Exp $
 
 =head1 AUTHOR
 

@@ -1,6 +1,8 @@
 Changes
 examples/aliases
+examples/dump-passwd.pl
 examples/mysql.pl
+examples/tdisplay
 Makefile.PL
 MANIFEST
 README
@@ -16,4 +18,6 @@ t/09.t
 t/10.t
 t/11.t
 t/12.t
+t/13.t
+t/14.t
 TabularDisplay.pm

@@ -1,22 +1,20 @@
 package Text::TabularDisplay;
 
 # ----------------------------------------------------------------------
-# $Id: Makefile.PL,v 1.3 2002/09/24 10:40:30 dlc Exp $
+# $Id: Makefile.PL,v 1.5 2002/10/25 04:10:26 dlc Exp $
 # ----------------------------------------------------------------------
 
 use strict;
-use vars qw($VERSION %PREREQ_PM %clean);
+use vars qw(%PREREQ_PM @EXE_FILES %clean);
 
 use ExtUtils::MakeMaker;
-use File::Basename qw(basename);
 
-$VERSION   = sprintf "%.02f", 0.37;
 %PREREQ_PM = ('IO::File');
-%clean     = ('FILES' => '$(DISTNAME)-$(VERSION).tar.gz');
+%clean     = ('FILES' => '$(DISTVNAME).tar$(SUFFIX)');
 
 WriteMakefile(
     NAME         => __PACKAGE__,
-    VERSION_FROM => basename($0),
+    VERSION_FROM => "TabularDisplay.pm",
     PREREQ_PM    => \%PREREQ_PM,
     clean        => \%clean,
 );

@@ -18,9 +18,9 @@ SYNOPSIS
         +----+-----------+
 
 DESCRIPTION
-    Text::TabularDisplay simplifies displaying data in a table. The output
-    is identical to the columnar display of query results in the mysql text
-    monitor. For example, this data:
+    Text::TabularDisplay simplifies displaying textual data in a table. The
+    output is identical to the columnar display of query results in the
+    mysql text monitor. For example, this data:
 
         1, "Tom Jones", "(666) 555-1212"
         2, "Barnaby Jones", "(666) 555-1213"
@@ -47,12 +47,12 @@ DESCRIPTION
 METHODS
     Text::TabularDisplay has four primary methods: new(), columns(), add(),
     and render(). new() creates a new Text::TabularDisplay instance;
-    columns() sets the expected columns in the output table; add() adds data
+    columns() sets the column headers in the output table; add() adds data
     to the instance; and render() returns a formatted string representation
     of the instance.
 
-    There are also a few auxilliary convenience methods: clone(), reset(),
-    and populate().
+    There are also a few auxilliary convenience methods: clone(), items(),
+    reset(), populate(), and paginate().
 
     new A Text::TabularDisplay instance can be created with column names
         passed as constructor args, so these two calls produce similar
@@ -69,16 +69,16 @@ METHODS
     columns
         Gets or sets the column names for an instance. This method is called
         automatically by the constructor with any parameters that are passed
-        to the constructor.
+        to the constructor (if any are passed).
 
         When called in scalar context, columns() returns the *number of
-        columns in the instance*, rather than the columns themselves. Note
-        that in list context, copies of the columns names are returned; the
-        names of the columns cannot be set this way.
+        columns in the instance*, rather than the columns themselves. In
+        list context, copies of the columns names are returned; the names of
+        the columns cannot be modified this way.
 
-    add Takes a list of items and adds them as the next column of data to be
-        displayed. Can also take a reference to an array, so that large
-        arrays don't need to be copied.
+    add Takes a list of items and appends it to the list of items to be
+        displayed. add() can also take a reference to an array, so that
+        large arrays don't need to be copied.
 
         As elements are processed, add() maintains the width of each column
         so that the resulting table has the correct dimensions.
@@ -147,11 +147,46 @@ METHODS
 
         As an aside, note the chaining of calls to add().
 
+        The elements in the table are padded such that there is the same
+        number of items in each row, including the header. Thus:
+
+            $t->columns(qw< One Two >);
+            print $t->render;
+
+            +-----+-----+----+
+            | One | Two |    |
+            +-----+-----+----+
+            | 1   | 2   | 3  |
+            | 4   | 5   | 6  |
+            | 7   | 8   | 9  |
+            | 10  | 11  | 12 |
+            +-----+-----+----+
+
+        And:
+
+            $t->columns(qw< One Two Three Four>);
+            print $t->render;
+
+            +-----+-----+-------+------+
+            | One | Two | Three | Four |
+            +-----+-----+-------+------+
+            | 1   | 2   | 3     |      |
+            | 4   | 5   | 6     |      |
+            | 7   | 8   | 9     |      |
+            | 10  | 11  | 12    |      |
+            +-----+-----+-------+------+
+
 OTHER METHODS
     clone()
         The clone() method returns an identical copy of a
         Text::TabularDisplay instance, completely separate from the cloned
         instance.
+
+    items()
+        The items() method returns the number of elements currently stored
+        in the data structure:
+
+            printf "There are %d elements in \$t.\n", $t->items;
 
     reset()
         Reset deletes the data from the instance, including columns. If
@@ -164,7 +199,7 @@ OTHER METHODS
 
             $sql = "SELECT " . join(", ", @c) . " FROM mytable";
             $t->columns(@c);
-            $t->add($dbh->selectall_arrayref($sql));
+            $t->populate($dbh->selectall_arrayref($sql));
 
         This is for convenience only; the implementation maps this to
         multiple calls to add().
@@ -212,7 +247,7 @@ NOTES / ISSUES
     Text::TabularDisplay is small and fast.
 
 VERSION
-    $Id: README,v 1.3 2002/09/24 03:35:31 dlc Exp $
+    $Id: README,v 1.6 2002/10/28 20:14:54 dlc Exp $
 
 AUTHOR
     darren chamberlain <darren@cpan.org>
