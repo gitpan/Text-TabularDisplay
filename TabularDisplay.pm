@@ -1,10 +1,8 @@
 package Text::TabularDisplay;
 
 # -------------------------------------------------------------------
-# $Id: TabularDisplay.pm,v 1.18 2002/10/24 22:26:20 dlc Exp $
-# -------------------------------------------------------------------
 # Text::TabularDisplay - Display text in formatted table output
-# Copyright (C) 2002 darren chamberlain <darren@cpan.org>
+# Copyright (C) 2004 darren chamberlain <darren@cpan.org>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -25,12 +23,7 @@ use strict;
 use integer;
 use vars qw($VERSION);
 
-BEGIN {
-    sub Version {
-        $VERSION = sprintf "%d.%02d", q$Revision: 1.18 $ =~ /(\d+)\.(\d+)/;
-    }
-    Version();
-}
+$VERSION = "1.19";
 
 # ---======================= Public Methods ======================---
 
@@ -240,7 +233,7 @@ sub _add {
 
         push @data, $add->[$i];
         $length->[$i] = $l
-            unless $length->[$i] > $l;
+            unless $length->[$i] && $length->[$i] > $l;
     }
     push @$where, \@data;
 }
@@ -542,7 +535,7 @@ Text::TabularDisplay is small and fast.
 
 =head1 VERSION
 
-$Id: TabularDisplay.pm,v 1.18 2002/10/24 22:26:20 dlc Exp $
+This documentation describes C<Text::TabularDisplay> version 1.19.
 
 =head1 AUTHOR
 

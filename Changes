@@ -2,6 +2,11 @@
                      --- Text-TabularDisplay ---
 ======================================================================
 
+2004-09-21 09:14  dlc
+
+	* TabularDisplay.pm (1.19): Applied a patch from Eric Cholet to
+	silence warnings (<https://rt.cpan.org/Ticket/Display.html?id=7693>)
+
 2002-10-28 15:14  dlc
 
 	* README (1.6): Version updates.
