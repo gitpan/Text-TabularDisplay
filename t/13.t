@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # vim: set ft=perl:
-# $Id: 13.t,v 1.2 2002/10/24 22:26:53 dlc Exp $
+# $Id: 13.t,v 1.1.1.1 2005/10/04 16:39:58 dlc Exp $
 
 # Following a bug report from David N. Blank-Edelman <dnb@ccs.neu.edu>,
 # I have added this test to check for silliness in how columns behaves.

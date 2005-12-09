@@ -247,7 +247,7 @@ NOTES / ISSUES
     Text::TabularDisplay is small and fast.
 
 VERSION
-    $Id: README,v 1.6 2002/10/28 20:14:54 dlc Exp $
+    $Id: README,v 1.1.1.1 2005/10/04 16:39:58 dlc Exp $
 
 AUTHOR
     darren chamberlain <darren@cpan.org>

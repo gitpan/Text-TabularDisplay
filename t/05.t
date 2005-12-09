@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # vim: set ft=perl:
-# $Id: 05.t,v 1.3 2002/09/24 03:35:58 dlc Exp $
+# $Id: 05.t,v 1.1.1.1 2005/10/04 16:39:58 dlc Exp $
 # Test passing arguments to render()
 
 use strict;

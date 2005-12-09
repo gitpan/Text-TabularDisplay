@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # vim: set ft=perl:
-# $Id: 03.t,v 1.3 2002/09/23 22:08:02 dlc Exp $
+# $Id: 03.t,v 1.1.1.1 2005/10/04 16:39:58 dlc Exp $
 # Yes, this is the same test file (almost) as 01.t, but
 # this one tests resetting the object, and there needs to
 # be an object with data in order to test resetting it.

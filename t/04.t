@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # vim: set ft=perl:
-# $Id: 04.t,v 1.2 2002/09/23 10:26:34 dlc Exp $
+# $Id: 04.t,v 1.1.1.1 2005/10/04 16:39:58 dlc Exp $
 
 use strict;
 use Text::TabularDisplay;

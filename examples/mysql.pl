@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # ----------------------------------------------------------------------
-# $Id: mysql.pl,v 1.3 2002/10/25 04:08:05 dlc Exp $
+# $Id: mysql.pl,v 1.1.1.1 2005/10/04 16:39:58 dlc Exp $
 # ----------------------------------------------------------------------
 # Example usage of Text::TabularDisplay to implement a low-functionality
 # version of the mysql text monitor.
