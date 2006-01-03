@@ -25,7 +25,7 @@ use strict;
 use integer;
 use vars qw($VERSION $REVISION);
 
-$VERSION = "1.21";  # $Date: 2005/12/09 21:04:48 $
+$VERSION = "1.22";  # $Date: 2005/12/09 21:04:48 $
 $REVISION = sprintf "%d.%02d", q$Revision: 1.2 $ =~ /(\d+)\.(\d+)/;
 
 # ---======================= Public Methods ======================---
