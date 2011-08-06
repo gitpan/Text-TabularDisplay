@@ -1,8 +1,6 @@
 package Text::TabularDisplay;
 
 # -------------------------------------------------------------------
-# $Id: TabularDisplay.pm,v 1.2 2005/12/09 21:04:48 dlc Exp $
-# -------------------------------------------------------------------
 # Text::TabularDisplay - Display text in formatted table output
 # Copyright (C) 2004 darren chamberlain <darren@cpan.org>
 #
@@ -23,10 +21,9 @@ package Text::TabularDisplay;
 
 use strict;
 use integer;
-use vars qw($VERSION $REVISION);
+use vars qw($VERSION);
 
-$VERSION = "1.22";  # $Date: 2005/12/09 21:04:48 $
-$REVISION = sprintf "%d.%02d", q$Revision: 1.2 $ =~ /(\d+)\.(\d+)/;
+$VERSION = "1.25";
 
 # ---======================= Public Methods ======================---
 
@@ -88,7 +85,7 @@ sub columns {
         }
 
         @{ $self->{ _COLUMNS } } = ();
-        _add($self->{ _COLUMNS }, $self->{ _LENGTHS }, \$self->{ _SIZE }, [ @_ ]);
+        $self->_add($self->{ _COLUMNS }, $self->{ _LENGTHS }, \$self->{ _SIZE }, [ @_ ]);
     }
     @columns = @{ $self->{ _COLUMNS }->[0] || [ ]};
 
@@ -106,7 +103,7 @@ sub add {
     my $add = UNIVERSAL::isa($_[0], 'ARRAY') ? shift : [ @_ ];
 
     if (@$add) {
-        _add($self->{ _DATA }, $self->{ _LENGTHS }, \$self->{ _SIZE }, $add);
+        $self->_add($self->{ _DATA }, $self->{ _LENGTHS }, \$self->{ _SIZE }, $add);
     }
 
     return $self;
@@ -225,6 +222,7 @@ sub paginate {
 # Adds @add to @where and modifies @lengths, as necessary
 # -------------------------------------------------------------------
 sub _add {
+    my $self = shift;
     my ($where, $length, $size, $add) = @_;
     my @data;
 
