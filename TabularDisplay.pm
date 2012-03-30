@@ -2,7 +2,7 @@ package Text::TabularDisplay;
 
 # -------------------------------------------------------------------
 # Text::TabularDisplay - Display text in formatted table output
-# Copyright (C) 2004-2011 darren chamberlain <darren@cpan.org>
+# Copyright (C) 2004-2012 darren chamberlain <darren@cpan.org>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -23,7 +23,7 @@ use strict;
 use integer;
 use vars qw($VERSION);
 
-$VERSION = "1.28";
+$VERSION = "1.29";
 
 # ---======================= Public Methods ======================---
 
@@ -351,7 +351,7 @@ instance; columns() sets the column headers in the output table;
 add() adds data to the instance; and render() returns a formatted
 string representation of the instance.
 
-There are also a few auxilliary convenience methods: clone(), items(),
+There are also a few auxiliary convenience methods: clone(), items(),
 reset(), populate(), and paginate().
 
 =over
@@ -525,7 +525,7 @@ calls to add().
 =head1 NOTES / ISSUES
 
 Text::TabularDisplay assumes it is handling strings, and does stringy
-things with the data, like legnth() and sprintf().  Non-character data
+things with the data, like length() and sprintf().  Non-character data
 can be passed in, of course, but will be treated as strings; this may
 have ramifications for objects that implement overloading.
 
