@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Text-TabularDisplay
-version:            1.35
+version:            1.37
 abstract:           Display text in formatted table output
 author:
     - darren chamberlain <darren@cpan.org>
@@ -10,8 +10,7 @@ configure_requires:
     ExtUtils::MakeMaker:  0
 build_requires:
     ExtUtils::MakeMaker:  0
-requires:
-    IO::File:  ~
+requires:  {}
 no_index:
     directory:
         - t
