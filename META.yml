@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Text-TabularDisplay
-version:            1.37
+version:            1.38
 abstract:           Display text in formatted table output
 author:
     - darren chamberlain <darren@cpan.org>

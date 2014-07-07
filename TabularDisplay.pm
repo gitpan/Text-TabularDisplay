@@ -15,15 +15,15 @@ package Text::TabularDisplay;
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-# 02111-1307  USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301 USA
 # -------------------------------------------------------------------
 
 use strict;
 use integer;
 use vars qw($VERSION);
 
-$VERSION = "1.37";
+$VERSION = "1.38";
 
 # ---======================= Public Methods ======================---
 
@@ -562,5 +562,5 @@ feedback, or good karma:
 
 =head1 VERSION
 
-This documentation describes C<Text::TabularDisplay> version 1.37.
+This documentation describes C<Text::TabularDisplay> version 1.38.
 
